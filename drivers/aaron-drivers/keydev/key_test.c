@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 	int val =0;
 	while (1) {
 	    read(fd,&val,4);
-	    printf("key:%d", val);
+	    printf("key:%d\n", val);
 	}
 
 	return 0;

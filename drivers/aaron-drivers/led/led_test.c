@@ -7,7 +7,7 @@
 int main(int argc, char** argv)
 {
 	int fd;
-	fd = open("/dev/led0", O_RDWR);
+	fd = open("/dev/xyz", O_RDWR);
 
 	if (fd == -1)
 	    printf("open faled");

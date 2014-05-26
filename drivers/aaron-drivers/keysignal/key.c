@@ -54,7 +54,9 @@ static struct timer_list button_timer;
 
 static irqreturn_t button_handler(int data, void * dev_id) 
 {
+	printk("1111\n");
   mod_timer(&button_timer, jiffies + HZ/100);
+  printk("2222\n");
 
   return IRQ_RETVAL(IRQ_HANDLED);
 }
@@ -68,6 +70,7 @@ int key_open (struct inode * inode, struct file * file)
 		atomic_inc(&can_open);
 		return -EBUSY;
 	} */
+	printk("3333\n");
 
     if (file->f_flags & O_NONBLOCK) {
 		if (down_trylock(&button_lock))
@@ -76,29 +79,34 @@ int key_open (struct inode * inode, struct file * file)
     	down(&button_lock);
     }
 		
-    request_irq(IRQ_EINT0, button_handler, IRQF_TRIGGER_MASK, "s1", NULL);
+    request_irq(IRQ_EINT0, button_handler, IRQF_TRIGGER_LOW, "s1", NULL);
+	printk("4444\n");
 
 	return 0;
 }
 
 ssize_t key_write (struct file * file, const char __user * buffer, size_t count, loff_t * fpos)
 {
+	printk("write\n");
 	int val;
 	copy_from_user(&val,buffer,count);
 	if (val == 1)
-		*gpfdat |= (1 << 4);
-	else
 		*gpfdat &= ~(1 << 4);
+	else
+    *gpfdat |= (1 << 4);
+
 
 	return count;
 }
 
 ssize_t key_read (struct file * file, char __user * buffer, size_t count, loff_t * fpos)
 {
+	printk("5555\n");
 	wait_event_interruptible(button_waitq, ev_press);
 
 	copy_to_user(buffer,&key_val,4);
 	ev_press = 0;
+	printk("6666\n");
 
 	return 1;
 }
@@ -130,11 +138,13 @@ int key_fasync (int fd, struct file * file, int on)
 
 void button_timer_function(unsigned long data)
 {
+	printk("7777\n");
   key_val = s3c2410_gpio_getpin(S3C2410_GPF0);
   ev_press = 1;
   wake_up_interruptible(&button_waitq);
 
   kill_fasync(&button_fasync,SIGIO, POLL_IN);
+  printk("8888\n");
 }
 
 
@@ -156,8 +166,8 @@ static int __init jz2440_key_init()
 	init_timer(&button_timer);
 	button_timer.function = button_timer_function;
 	add_timer(&button_timer);
-	devt = MKDEV(major,0);
 	major = register_chrdev(0,"key_drv",&key_operations);
+	devt = MKDEV(major,0);
 	key_dev_class = class_create(THIS_MODULE,"key_drv");
 	device_create(key_dev_class,NULL,devt,NULL,"key0");
 	gpfcon = (volatile unsigned long*)ioremap(0x56000050, 16);

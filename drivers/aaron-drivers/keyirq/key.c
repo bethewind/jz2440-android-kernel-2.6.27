@@ -47,9 +47,11 @@ static DECLARE_WAIT_QUEUE_HEAD(button_waitq);
 
 static irqreturn_t button_handler(int data, void * dev_id) 
 {
+	printk("1111");
   key_val = s3c2410_gpio_getpin(S3C2410_GPF0);
   ev_press = 1;
   wake_up_interruptible(&button_waitq);
+  printk("2222");
 
   return IRQ_RETVAL(IRQ_HANDLED);
 }
@@ -58,7 +60,7 @@ static irqreturn_t button_handler(int data, void * dev_id)
 
 int key_open (struct inode * inode, struct file * file)
 {
-    request_irq(IRQ_EINT0, button_handler, IRQF_TRIGGER_MASK, "s1", NULL);
+    request_irq(IRQ_EINT0, button_handler, IRQF_TRIGGER_LOW , "s1", NULL);
 
 	return 0;
 }
@@ -77,10 +79,12 @@ ssize_t key_write (struct file * file, const char __user * buffer, size_t count,
 
 ssize_t key_read (struct file * file, char __user * buffer, size_t count, loff_t * fpos)
 {
+	printk("3333");
 	wait_event_interruptible(button_waitq, ev_press);
 
 	copy_to_user(buffer,&key_val,4);
 	ev_press = 0;
+	printk("4444");
 
 	return 1;
 }
@@ -93,10 +97,12 @@ int key_close (struct inode * inode, struct file * file)
 
 unsigned int key_poll (struct file * file, struct poll_table_struct * wait)
 {
+	printk("5555");
 	unsigned int mask = 0;
 	poll_wait(file,&button_waitq,wait);
 	if (ev_press)
 		mask |= POLLIN | POLLRDNORM;
+	printk("6666");
 
 	return mask;
 }
@@ -117,8 +123,8 @@ int major;
 dev_t devt;
 static int __init jz2440_key_init()
 {
-	devt = MKDEV(major,0);
 	major = register_chrdev(0,"key_drv",&key_operations);
+	devt = MKDEV(major,0);
 	key_dev_class = class_create(THIS_MODULE,"key_drv");
 	device_create(key_dev_class,NULL,devt,NULL,"key0");
 	gpfcon = (volatile unsigned long*)ioremap(0x56000050, 16);

@@ -45,13 +45,15 @@ int led_open (struct inode * inode, struct file * file)
 }
 
 ssize_t led_write (struct file * file, const char __user * buffer, size_t count, loff_t * fpos)
-{
+{	
+	printk("33333");
 	int val;
 	copy_from_user(&val,buffer,count);
 	if (val == 1)
-		*gpfdat |= (1 << 4);
-	else
 		*gpfdat &= ~(1 << 4);
+	else
+                *gpfdat |= (1 << 4);
+	printk("444444");
 
 	return count;
 }
@@ -66,18 +68,22 @@ int major;
 dev_t devt;
 static int __init jz2440_led_init()
 {
+	printk("11111");
 	devt = MKDEV(major,0);
-	major = register_chrdev(0,"led_drv",&led_operations);
-	led_dev_class = class_create(THIS_MODULE,"led_drv");
-	device_create(led_dev_class,NULL,devt,NULL,"led0");
+	major = register_chrdev(0,"first_drv1",&led_operations);
+	//led_dev_class = class_create(THIS_MODULE,"firstdrv1");
+	//device_create(led_dev_class,NULL,devt,NULL,"xyz");
 	gpfcon = (volatile unsigned long*)ioremap(0x56000050, 16);
 	gpfdat = gpfcon + 1;
+         printk("22222");
+
+	return 0;
 }
 static void __exit jz2440_led_exit()
 {
-	unregister_chrdev(major, "led_drv");
-	class_destroy(led_dev_class);
-	device_destroy(led_dev_class,devt);
+	unregister_chrdev(major, "first_drv1");
+	//class_destroy(led_dev_class);
+	//device_destroy(led_dev_class,devt);
 	iounmap(gpfcon);
 }
 

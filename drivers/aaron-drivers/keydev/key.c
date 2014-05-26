@@ -46,6 +46,7 @@ int key_open (struct inode * inode, struct file * file)
 
 ssize_t key_write (struct file * file, const char __user * buffer, size_t count, loff_t * fpos)
 {
+	printk("write b\n");
 	int val;
 	copy_from_user(&val,buffer,count);
 	if (val == 1)
@@ -53,11 +54,14 @@ ssize_t key_write (struct file * file, const char __user * buffer, size_t count,
 	else
 		*gpfdat &= ~(1 << 4);
 
+	printk("write e\n");
+
 	return count;
 }
 
 ssize_t key_read (struct file * file, char __user * buffer, size_t count, loff_t * fpos)
 {
+	printk("read b\n");
 	unsigned long gpfDat = *gpfdat;
 	int val;
 	if (gpfDat & 0x00000001)
@@ -66,6 +70,7 @@ ssize_t key_read (struct file * file, char __user * buffer, size_t count, loff_t
 		val = 0;
 
 	copy_to_user(buffer,&val,4);
+	printk("read e\n");
 
 	return 4;
 }
@@ -82,21 +87,26 @@ int major;
 dev_t devt;
 static int __init jz2440_key_init()
 {
-	devt = MKDEV(major,0);
+	printk("init b\n");
 	major = register_chrdev(0,"key_drv",&key_operations);
+	devt = MKDEV(major,0);
 	key_dev_class = class_create(THIS_MODULE,"key_drv");
 	device_create(key_dev_class,NULL,devt,NULL,"key0");
 	gpfcon = (volatile unsigned long*)ioremap(0x56000050, 16);
 	gpfdat = gpfcon + 1;
 
+	printk("init e\n");
+
 	return 0;
 }
 static void __exit jz2440_key_exit()
 {
+	printk("exit b\n");
 	unregister_chrdev(major, "key_drv");
 	class_destroy(key_dev_class);
 	device_destroy(key_dev_class,devt);
 	iounmap(gpfcon);
+	printk("exit e\n");
 }
 
 

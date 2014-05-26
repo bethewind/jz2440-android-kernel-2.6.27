@@ -10,10 +10,13 @@
 int fd;
 void sighandler (int signum)
 {
+	 printf("sighandler");
     int val =0;
 
     read(fd,&val,4);
     printf("key:%d", val);
+	val = 1;
+	write(fd,&val,4);
 }
 
 int main(int argc, char** argv)

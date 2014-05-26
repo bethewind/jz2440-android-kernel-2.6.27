@@ -10,11 +10,11 @@
 int fd;
 void sighandler (int signum)
 {
-	 printf("sighandler");
+	 printf("sighandler\n");
     int val =0;
 
     read(fd,&val,4);
-    printf("key:%d", val);
+    printf("key:%d\n", val);
 	val = 1;
 	write(fd,&val,4);
 }

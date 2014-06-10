@@ -110,48 +110,7 @@ static struct s3c2410_uartcfg smdk2440_uartcfgs[] __initdata = {
 	}
 };
 
-/* LCD driver info */
 /*
-static struct s3c2410fb_display smdk2440_lcd_cfg __initdata = {
-
-	.lcdcon5 = S3C2410_LCDCON5_FRM565 | 
-		S3C2410_LCDCON5_INVVLINE | 
-		S3C2410_LCDCON5_INVVFRAME | 
-		S3C2410_LCDCON5_PWREN | 
-		S3C2410_LCDCON5_HWSWP, 
-		.type = S3C2410_LCDCON1_TFT, 
-		.width = 240, 
-		.height = 320, 
-		.pixclock = 174757, 
-		.xres = 240, 
-		.yres = 320, 
-		.bpp = 16, 
-		.left_margin = 6, 
-		.right_margin = 37, 
-		.hsync_len = 6, 
-		.upper_margin = 4, 
-		.lower_margin = 6, 
-		.vsync_len = 2, 
-
-};
-
-static struct s3c2410fb_mach_info smdk2440_fb_info __initdata = {
-	.displays = &smdk2440_lcd_cfg, 
-	.num_displays = 1, 
-	.default_display = 0, 
-	.gpccon = 0xaa955699, 
-	.gpccon_mask = 0xffc003cc, 
-	.gpcup = 0x0000ffff, 
-	.gpcup_mask = 0xffffffff, 
-	.gpdcon = 0xaa95aaa1, 
-	.gpdcon_mask = 0xffc0fff0, 
-	.gpdup = 0x0000faff, 
-	.gpdup_mask = 0xffffffff, 
-	.lpcsel = 0xf82, 
-
-};
-*/
-
 #if defined(CONFIG_FB_S3C2410_N240320)
 
 #define LCD_WIDTH 240
@@ -220,6 +179,22 @@ static struct s3c2410fb_mach_info smdk2440_fb_info __initdata = {
 #define LCD_VSYNC_LEN 2
 
 #endif
+*/
+
+#define LCD_WIDTH 480
+#define LCD_HEIGHT 272
+#define LCD_PIXCLOCK 100000   /* VCLK ps*/
+
+#define LCD_RIGHT_MARGIN 1
+#define LCD_LEFT_MARGIN 1
+#define LCD_HSYNC_LEN 40
+
+#define LCD_UPPER_MARGIN 1
+#define LCD_LOWER_MARGIN 1
+#define LCD_VSYNC_LEN 9
+
+#define LCD_CON5 (1<<11) | (1<<9) | (1<<8) | (1<<3) | (1<<2) | (1<<0)
+
 
 #if defined (LCD_WIDTH)
 
@@ -258,18 +233,18 @@ static struct s3c2410fb_mach_info mini2440_fb_info __initdata = {
 	.num_displays	= 1,
 	.default_display = 0,
 
-	.gpccon =       0xaa955699,
-	.gpccon_mask =  0xffc003cc,
-	.gpcup =        0x0000ffff,
+	.gpccon =       0xaaaaaaaa,
+	.gpccon_mask =  0xffffffff,
+	.gpcup =        0xffff,
 	.gpcup_mask =   0xffffffff,
 
-	.gpdcon =       0xaa95aaa1,
-	.gpdcon_mask =  0xffc0fff0,
-	.gpdup =        0x0000faff,
+	.gpdcon =       0xaaaaaaaa,
+	.gpdcon_mask =  0xffffffff,
+	.gpdup =        0xffff,
 	.gpdup_mask =   0xffffffff,
 
 
-	.lpcsel		= 0xf82,
+	.lpcsel		= 0x0,
 };
 
 #endif

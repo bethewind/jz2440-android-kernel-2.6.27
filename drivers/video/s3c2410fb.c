@@ -372,6 +372,8 @@ static void s3c2410fb_calculate_tft_lcd_regs(const struct fb_info *info,
  */
 static void s3c2410fb_activate_var(struct fb_info *info)
 {
+	printk("----------------------------- s3c2410fb_activate_var\n");
+	dump_stack();
 	struct s3c2410fb_info *fbi = info->par;
 	void __iomem *regs = fbi->io;
 	int type = fbi->regs.lcdcon1 & S3C2410_LCDCON1_TFT;
@@ -393,7 +395,10 @@ static void s3c2410fb_activate_var(struct fb_info *info)
 			clkdiv = 2;
 	}
 
-	fbi->regs.lcdcon1 |=  S3C2410_LCDCON1_CLKVAL(clkdiv);
+	unsigned long clk = clk_get_rate(fbi->clk);
+	printk("------------------ clk:%ld\n", clk);
+	printk("------------------ clkdiv:%d\n", clkdiv);
+	fbi->regs.lcdcon1 |=  S3C2410_LCDCON1_CLKVAL(4);
 
 	/* write new registers */
 
@@ -416,6 +421,7 @@ static void s3c2410fb_activate_var(struct fb_info *info)
 
 	fbi->regs.lcdcon1 |= S3C2410_LCDCON1_ENVID,
 	writel(fbi->regs.lcdcon1, regs + S3C2410_LCDCON1);
+	s3c2410_gpio_setpin(S3C2410_GPB0, 1);	// back light control, enable
 }
 
 /*
@@ -544,6 +550,7 @@ static void s3c2410fb_lcd_enable(struct s3c2410fb_info *fbi, int enable)
 		fbi->regs.lcdcon1 &= ~S3C2410_LCDCON1_ENVID;
 
 	writel(fbi->regs.lcdcon1, fbi->io + S3C2410_LCDCON1);
+	s3c2410_gpio_setpin(S3C2410_GPB0, enable ? 1 : 0);
 
 	local_irq_restore(flags);
 }
@@ -719,6 +726,13 @@ static int s3c2410fb_init_registers(struct fb_info *info)
 
 	/* ensure temporary palette disabled */
 	writel(0x00, tpal);
+
+	s3c2410_gpio_cfgpin(S3C2410_GPB0, S3C2410_GPB0_OUTP); // back light control
+
+	s3c2410_gpio_pullup(S3C2410_GPB0, 0); 
+
+	s3c2410_gpio_setpin(S3C2410_GPB0, 0);
+	msleep(10);	
 
 	LCD_POWER_ON();
 
